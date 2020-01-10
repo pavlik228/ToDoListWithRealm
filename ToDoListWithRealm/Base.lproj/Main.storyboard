@@ -117,7 +117,11 @@
                     </tableView>
                     <navigationItem key="navigationItem" id="p2U-nW-xoz">
                         <rightBarButtonItems>
-                            <barButtonItem systemItem="add" id="pvI-Hm-nmc"/>
+                            <barButtonItem systemItem="add" id="pvI-Hm-nmc">
+                                <connections>
+                                    <action selector="addButton:" destination="hQk-Nd-tn5" id="KMN-7h-WPi"/>
+                                </connections>
+                            </barButtonItem>
                             <barButtonItem systemItem="edit" id="qU4-5T-39b"/>
                         </rightBarButtonItems>
                     </navigationItem>

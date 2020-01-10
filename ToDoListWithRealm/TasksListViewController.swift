@@ -10,30 +10,18 @@ class TasksListViewController: UITableViewController {
         super.viewDidLoad()
         
         tasksLists = realm.objects(TasksList.self)
-        
-//        let shopingList = TasksList()
-//        shopingList.name = "ShopingList"
-//
-//        let milk = Task()
-//        milk.name = "Milk"
-//        milk.note = "2l"
-//
-//        shopingList.tasks.append(milk)
-//
-//        let bread = Task(value: ["Bread"])
-//
-//        shopingList.tasks.append(bread)
-//
-//        let moviesList = TasksList(value: ["MoviesList", Date(), [["John Weak"], ["Tor"]]])
-//
-//        DispatchQueue.main.async {
-//            StorageManager.saveTasksList([shopingList, moviesList])
-//        }
-        
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        tableView.reloadData()
+    }
+    
     @IBAction func editButtonPressed(_ sender: Any) {
     }
     @IBAction func addButtonPressed(_ sender: Any) {
+        alertForAddAndUpdateList()
     }
     @IBAction func sortingList(_ sender: UISegmentedControl) {
     }
@@ -59,5 +47,34 @@ extension TasksListViewController {
             let tasksVC = segue.destination as! TasksViewController
             tasksVC.currentTasksList = tasksList
         }
+    }
+}
+
+extension TasksListViewController {
+    
+    private func alertForAddAndUpdateList() {
+        let alert = UIAlertController(title: "New List", message: "Please insert new value", preferredStyle: .alert)
+        var alertTextField: UITextField!
+        
+        let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
+            guard let text = alertTextField.text, !text.isEmpty else { return }
+            
+            let tasksList = TasksList()
+            tasksList.name = text
+            
+            StorageManager.saveTasksList(tasksList)
+            self.tableView.insertRows(at: [IndexPath(row: self.tasksLists.count-1, section: 0)], with: .automatic)
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
+        
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+        alert.addTextField { textField in
+            alertTextField = textField
+            textField.placeholder = "List name"
+        }
+        
+        present(alert, animated: true)
     }
 }
