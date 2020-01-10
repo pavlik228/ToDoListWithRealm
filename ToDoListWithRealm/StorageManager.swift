@@ -24,4 +24,12 @@ class StorageManager {
         }
     }
     
+    static func deleteTasksList(_ tasksList: TasksList) {
+        try! realm.write {
+            let tasks = tasksList.tasks
+            realm.delete(tasks)
+            realm.delete(tasksList)
+        }
+    }
+    
 }
