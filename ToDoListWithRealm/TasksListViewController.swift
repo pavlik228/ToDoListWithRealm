@@ -10,6 +10,7 @@ class TasksListViewController: UITableViewController {
         super.viewDidLoad()
         
         tasksLists = realm.objects(TasksList.self)
+        navigationItem.leftBarButtonItem = editButtonItem
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -18,8 +19,6 @@ class TasksListViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    @IBAction func editButtonPressed(_ sender: Any) {
-    }
     @IBAction func addButtonPressed(_ sender: Any) {
         alertForAddAndUpdateList()
     }
@@ -52,18 +51,30 @@ extension TasksListViewController {
 
 extension TasksListViewController {
     
-    private func alertForAddAndUpdateList() {
-        let alert = UIAlertController(title: "New List", message: "Please insert new value", preferredStyle: .alert)
+    private func alertForAddAndUpdateList(_ listName: TasksList? = nil, complition: (() -> Void)? = nil) {
+        
+        var title = "New List"
+        
+        if listName != nil {
+            title = "Edit List"
+        }
+        
+        let alert = UIAlertController(title: title, message: "Please insert new value", preferredStyle: .alert)
         var alertTextField: UITextField!
         
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
             guard let text = alertTextField.text, !text.isEmpty else { return }
             
-            let tasksList = TasksList()
-            tasksList.name = text
-            
-            StorageManager.saveTasksList(tasksList)
-            self.tableView.insertRows(at: [IndexPath(row: self.tasksLists.count-1, section: 0)], with: .automatic)
+            if let listName = listName {
+                StorageManager.editTasksListName(listName, newTasksListName: text)
+                if complition != nil { complition!() }
+            } else {
+                let tasksList = TasksList()
+                tasksList.name = text
+                
+                StorageManager.saveTasksList(tasksList)
+                self.tableView.insertRows(at: [IndexPath(row: self.tasksLists.count-1, section: 0)], with: .automatic)
+            }
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
@@ -73,6 +84,10 @@ extension TasksListViewController {
         alert.addTextField { textField in
             alertTextField = textField
             textField.placeholder = "List name"
+        }
+        
+        if let listName = listName {
+            alertTextField.text = listName.name
         }
         
         present(alert, animated: true)
@@ -88,6 +103,20 @@ extension TasksListViewController {
             StorageManager.deleteTasksList(currentList)
             tableView.deleteRows(at: [indexPath], with: .automatic)
         }
-        return UISwipeActionsConfiguration(actions: [deleteAction])
+        
+        let editAction = UIContextualAction(style: .normal, title: "Edit") {_,_,_ in
+            self.alertForAddAndUpdateList(currentList) {
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+        }
+        
+        let doneAction = UIContextualAction(style: .normal, title: "Done") {_,_,_ in
+            StorageManager.makeAllDone(currentList)
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
+        
+        doneAction.backgroundColor = .green
+        
+        return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
     }
 }

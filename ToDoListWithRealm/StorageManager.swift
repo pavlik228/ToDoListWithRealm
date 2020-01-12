@@ -32,4 +32,34 @@ class StorageManager {
         }
     }
     
+    static func editTasksListName(_ tasksList: TasksList, newTasksListName: String) {
+        try! realm.write {
+            tasksList.name = newTasksListName
+        }
+    }
+    
+    static func makeAllDone(_ tasksList: TasksList) {
+        try! realm.write {
+            tasksList.tasks.setValue(true, forKey: "isComplete")
+        }
+    }
+    
+    static func deleteTask(_ task: Task) {
+        try! realm.write {
+            realm.delete(task)
+        }
+    }
+    
+    static func editTask(_ task: Task, newTaskName: String, newTaskNote: String) {
+        try! realm.write {
+            task.name = newTaskName
+            task.note = newTaskNote
+        }
+    }
+    
+    static func makeDone(_ task: Task) {
+        try! realm.write {
+            task.isComplete.toggle()
+        }
+    }
 }
